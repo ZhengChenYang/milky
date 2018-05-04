@@ -1,5 +1,6 @@
 package com.milky.bean.factory.util;
 
+import com.milky.bean.factory.support.TypeConverter;
 import com.milky.core.BeanDefinition;
 import com.milky.core.ConstructorArgumentValues;
 import com.milky.core.MicroKernel;
@@ -7,6 +8,7 @@ import com.milky.core.PropertyValue;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,8 +26,8 @@ public class BeanUtils {
         Class clazz = bd.getBeanClass();
 
         int nrOfArgument = 0;
-        if(bd.getConstrcutorArgumentValues()!=null){
-            nrOfArgument = bd.getConstrcutorArgumentValues().getNrOfArguments();
+        if(bd.getConstructorArgumentValues()!=null){
+            nrOfArgument = bd.getConstructorArgumentValues().getNrOfArguments();
         }
 
         if(nrOfArgument==0){
@@ -74,11 +76,18 @@ public class BeanUtils {
         targetType = targetType.trim().toLowerCase();
         String ref = valueHolder.getRef();
 
+
         if(!valueHolder.isConverted()){
-            // deal with the primitive type
+
             Object rawValue = valueHolder.getValue();
+
             if (rawValue!=null) {
-                if(PrimitiveTypeConversion.isPrimitive(targetType)){
+                if(rawValue instanceof TypeConverter){  //deal with the object inherit the TypeConverter
+                    Object newValue = ((TypeConverter)rawValue).convert();
+                    valueHolder.setValue(newValue);
+                    valueHolder.setConverted(true);
+                }
+                else if(PrimitiveTypeConversion.isPrimitive(targetType)){   // deal with the primitive type
                     Object newValue = PrimitiveTypeConversion.convert((String)rawValue, targetType);
                     valueHolder.setValue(newValue);
                     valueHolder.setConverted(true);
@@ -104,19 +113,24 @@ public class BeanUtils {
     public static Object executeConversion(PropertyValue propertyValue, MicroKernel kernel, String targetType) throws Exception {
 
         String ref = propertyValue.getRef();
+
         if(!propertyValue.isConverted()){
             Object rawValue = propertyValue.getValue();
             if (rawValue!=null) {
-                if (PrimitiveTypeConversion.isPrimitive(targetType)) {
+                if(rawValue instanceof TypeConverter){  //deal with the object inherit the TypeConverter
+                    Object newValue = ((TypeConverter)rawValue).convert();
+                    propertyValue.setValue(newValue);
+                    propertyValue.setConverted(true);
+                }
+                else if(PrimitiveTypeConversion.isPrimitive(targetType)) {  // deal with the primitive type
                     Object newValue = PrimitiveTypeConversion.convert((String) rawValue, targetType);
                     propertyValue.setValue(newValue);
                     propertyValue.setConverted(true);
                 }
             }
 
-            if(propertyValue.getRef()!=null){
+            if(ref!=null){
                 Object newValue = kernel.getBean(ref);
-
                 propertyValue.setValue(newValue);
                 propertyValue.setConverted(true);
             }

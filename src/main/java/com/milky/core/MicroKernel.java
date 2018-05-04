@@ -3,10 +3,9 @@ package com.milky.core;
 import com.milky.bean.factory.support.BeanDefinitionRegistry;
 import com.milky.bean.factory.util.BeanUtils;
 import com.milky.bean.factory.util.PrimitiveTypeConversion;
-import com.sun.scenario.effect.impl.state.LinearConvolveKernel;
+import com.milky.bean.factory.xml.ReaderContext;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import sun.awt.AWTAccessor;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -18,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by 52678 on 2018/3/19.
  */
-public class MicroKernel implements BeanDefinitionRegistry{
+public class MicroKernel implements BeanDefinitionRegistry {
 
 
     private static Logger LOGGER = LogManager.getLogger(MicroKernel.class);
@@ -45,7 +44,7 @@ public class MicroKernel implements BeanDefinitionRegistry{
     private final Map<String, Object> singletonObjects = new ConcurrentHashMap<String, Object>();
 
     /** cache of Class: class name --> Class instance */
-    private final Map<String, Class> cachedClass = new ConcurrentHashMap<String, Class>();
+    private final Map<String, Class> cachedClasses = new ConcurrentHashMap<String, Class>();
 
     /** Names of beans that are currently in creation **/
     private final Set<String> singletonsCurrentlyInCreation =
@@ -220,7 +219,7 @@ public class MicroKernel implements BeanDefinitionRegistry{
     }
 
     private void instantiateBean(Constructor constructor, BeanDefinition bd, BeanWrapper beanWrapper) throws IllegalAccessException, InvocationTargetException, InstantiationException {
-        Map<Integer, ConstructorArgumentValues.ValueHolder> map = bd.getConstrcutorArgumentValues().getIndexedArgumentValues();
+        Map<Integer, ConstructorArgumentValues.ValueHolder> map = bd.getConstructorArgumentValues().getIndexedArgumentValues();
         if(map.size()==0){
             constructor.newInstance();
         }
@@ -231,7 +230,7 @@ public class MicroKernel implements BeanDefinitionRegistry{
             for(int i=0; i<map.size(); i++){
                 ConstructorArgumentValues.ValueHolder valueHolder = map.get(i);
                 if(valueHolder.isConverted()){
-                    // execute conversion
+                    // execute the conversion
                     params[i] = valueHolder.getValue();
                 }
                 else{
@@ -252,8 +251,8 @@ public class MicroKernel implements BeanDefinitionRegistry{
         }
     }
 
-    public Map<String, Class> getCachedClass() {
-        return cachedClass;
+    public Map<String, Class> getCachedClasses() {
+        return cachedClasses;
     }
 
     public boolean isSingletonCurrentlyInCreation(String beanName) {
@@ -270,6 +269,23 @@ public class MicroKernel implements BeanDefinitionRegistry{
 
     public void addSingletonFactory(String beanName, ObjectFactory objectFactory){
         this.singletonFactories.put(beanName, objectFactory);
+    }
+
+    public Class getCachedClass(String className){
+        if(this.cachedClasses.containsKey(className)){
+            return this.cachedClasses.get(className);
+        }
+        else{
+            Class clazz = null;
+            try {
+                clazz = Class.forName(className);
+                this.cachedClasses.put(className, clazz);
+                return clazz;
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 
     public ObjectFactory getSingletonFactory(String factoryName){

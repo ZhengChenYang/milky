@@ -1,5 +1,7 @@
 package com.milky.core;
 
+import jdk.internal.org.objectweb.asm.tree.analysis.Value;
+
 import java.util.*;
 
 /**
@@ -17,6 +19,11 @@ public class ConstructorArgumentValues {
         private String name;
         private String ref;
         private boolean isConverted = false;
+
+        public ValueHolder(){
+
+        }
+
         /**
          * Create a new ValueHolder for the given value, type and name.
          * @param value the argument value

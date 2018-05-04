@@ -1,6 +1,9 @@
 package com.milky.core;
 
+import org.apache.ibatis.ognl.IntHashMap;
+
 import java.lang.reflect.Constructor;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -10,9 +13,9 @@ public class BeanDefinition {
     private Class beanClass;
     private String name;
     private String scope;
-    private ConstructorArgumentValues constructorArgumentValues;
-    private PropertyValues propertyValues;
-    private Map<String, Object> customizedFeatureMap;
+    private ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
+    private PropertyValues propertyValues = new PropertyValues();
+    private Map<String, Object> customizedFeatureMap = new HashMap<String, Object>();
     private Constructor cachedConstructor;
 
     public BeanDefinition(){
@@ -43,9 +46,6 @@ public class BeanDefinition {
         this.scope = scope;
     }
 
-    public ConstructorArgumentValues getConstrcutorArgumentValues() {
-        return constructorArgumentValues;
-    }
 
     public void setConstructorArgumentValues(ConstructorArgumentValues constructorArgumentValues) {
         this.constructorArgumentValues = constructorArgumentValues;
