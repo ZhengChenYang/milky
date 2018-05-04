@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <excludeFromCompile>
+      <file url="file://$PROJECT_DIR$/src/main/java/DefaultDocumentLoader.java" />
+      <file url="file://$PROJECT_DIR$/src/main/java/XmlBeanDefinitionReader.java" />
+      <file url="file://$PROJECT_DIR$/src/main/java/XmlBeanFactory.java" />
+      <file url="file://$PROJECT_DIR$/src/main/java/DefaultBeanDefinitionDocumentReader.java" />
+    </excludeFromCompile>
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="milky" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="milky" target="1.6" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
