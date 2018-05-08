@@ -11,7 +11,7 @@ import java.util.*;
  */
 public class ConstructorArgumentValues {
 
-    private final Map<Integer, ValueHolder> indexedArgumentValues = new LinkedHashMap<Integer, ValueHolder>();
+    private final LinkedHashMap<Integer, ValueHolder> indexedArgumentValues = new LinkedHashMap<Integer, ValueHolder>();
 
     public static class ValueHolder{
         private Object value;

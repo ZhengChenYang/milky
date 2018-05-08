@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:p="http://www.springframework.org/schema/p"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
-
-
-
-    <!-- 赋null值 -->
-    <!--
-    ...
-        <property name="xxx"><null/></property>
-    ...
-     -->
+<beans>
+    <bean id="testBean" class="com.milky.Test">
+        <constructor-arg index="1" type="char" name="a" value="abc" />
+        <constructor-arg index="2" type="int" name="b" value="2" />
+        <constructor-arg index="3" type="int" name="c" value="3" />
+        <constructor-arg index="4" name="str">
+            <array value-type="char">
+                <value>aaa</value>
+                <value>bb</value>
+            </array>
+        </constructor-arg>
+        <property name="s" value="true" />
+    </bean>
 </beans>

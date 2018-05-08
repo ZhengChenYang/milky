@@ -16,10 +16,13 @@ public class Test {
     public int b;
     public int c;
     private boolean s;
-    public Test(char a, int b, int c){
+    public char[] str;
+
+    public Test(char a, int b, int c, char[] str){
         this.a = a;
         this.b = b;
         this.c = c;
+        this.str = str;
     }
 
     public boolean isS() {
@@ -45,10 +48,5 @@ public class Test {
         for(Field f:field){
             System.out.println(f.getName());
         }
-
-
-
-
-
     }
 }

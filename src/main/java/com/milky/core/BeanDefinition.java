@@ -12,7 +12,7 @@ import java.util.Map;
 public class BeanDefinition {
     private Class beanClass;
     private String name;
-    private String scope;
+    private String scope = "singleton";
     private ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
     private PropertyValues propertyValues = new PropertyValues();
     private Map<String, Object> customizedFeatureMap = new HashMap<String, Object>();

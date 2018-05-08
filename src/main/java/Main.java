@@ -1,24 +1,24 @@
 import com.milky.Test;
-import com.milky.bean.factory.BeanFactory;
-import com.milky.bean.factory.util.ConstructorComparator;
-import com.milky.bean.factory.xml.XmlBeanDefinitionReader;
+
+import com.milky.bean.factory.XmlBeanFactory;
 import com.milky.core.*;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+
 
 import java.io.File;
-import java.lang.reflect.Constructor;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * Created by 52678 on 2018/3/6.
  */
 public class Main {
 
-    public static void main(String[] args) throws NoSuchMethodException, ClassNotFoundException {
+    public static void main(String[] args) throws Exception {
+        test2();
 
+    }
+
+    private static void test1(){
         char[] s;
         BeanDefinition beanDefinition = new BeanDefinition();
         // bean name
@@ -38,9 +38,9 @@ public class Main {
         );
         cav.addArgumentValue(1,
                 new ConstructorArgumentValues.ValueHolder(
-                "1",
-                int.class.getName(),
-                null
+                        "1",
+                        int.class.getName(),
+                        null
                 )
         );
         cav.addArgumentValue(2, new ConstructorArgumentValues.ValueHolder(
@@ -74,4 +74,16 @@ public class Main {
             e.printStackTrace();
         }
     }
+
+    private static void test2() throws Exception {
+        File file = new File("C:\\Users\\52678\\Desktop\\file\\project\\milky\\src\\main\\resources\\test.xml");
+        FileSystemResource fsr = new FileSystemResource(file);
+        XmlBeanFactory factory = new XmlBeanFactory();
+        factory.loadResource(fsr);
+
+        System.out.println(factory.getBean("testBean"));
+        Map<String, Object> map = factory.getSingletonObjects();
+        System.out.println(map);
+    }
+
 }

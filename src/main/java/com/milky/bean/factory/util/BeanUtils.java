@@ -1,6 +1,8 @@
 package com.milky.bean.factory.util;
 
 import com.milky.bean.factory.support.TypeConverter;
+import com.milky.bean.factory.util.editor.DataPropertyEditorRegistrar;
+import com.milky.bean.factory.util.editor.NumberEditor;
 import com.milky.core.BeanDefinition;
 import com.milky.core.ConstructorArgumentValues;
 import com.milky.core.MicroKernel;
@@ -8,10 +10,7 @@ import com.milky.core.PropertyValue;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by 52678 on 2018/3/31.
@@ -57,13 +56,19 @@ public class BeanUtils {
 
     private static boolean isMatchConstructorParameter(Constructor candidate, BeanDefinition bd){
 
-        //whether this candidate matches the bean defintition
-        Map<Integer, ConstructorArgumentValues.ValueHolder> valueHolderMap = bd.getConstrcutorArgumentValues().getIndexedArgumentValues();
+        //whether this candidate matches the bean definition
+        Map<Integer, ConstructorArgumentValues.ValueHolder> valueHolderMap = bd.getConstructorArgumentValues().getIndexedArgumentValues();
         Class[] classes = candidate.getParameterTypes();
         for(int i=0; i<classes.length; i++){
             ConstructorArgumentValues.ValueHolder vh = valueHolderMap.get(i);
             String className = classes[i].getName();
-            if(!className.equals(vh.getType())){
+            if(className.equals(vh.getType()) || (classes[i].isArray() && vh.getType().equals("array")) ||
+                    (classes[i].isInstance(List.class) && vh.getType().equals("list")) ||
+                    (classes[i].isInstance(Map.class) && vh.getType().equals("map")) ||
+                    (classes[i].isInstance(Set.class) && vh.getType().equals("set")) ){
+                continue;
+            }
+            else{
                 return false;
             }
         }
@@ -83,12 +88,13 @@ public class BeanUtils {
 
             if (rawValue!=null) {
                 if(rawValue instanceof TypeConverter){  //deal with the object inherit the TypeConverter
-                    Object newValue = ((TypeConverter)rawValue).convert();
+                    Object newValue = ((TypeConverter)rawValue).convert(kernel);
                     valueHolder.setValue(newValue);
                     valueHolder.setConverted(true);
                 }
-                else if(PrimitiveTypeConversion.isPrimitive(targetType)){   // deal with the primitive type
-                    Object newValue = PrimitiveTypeConversion.convert((String)rawValue, targetType);
+                else if(rawValue instanceof String){   // deal with the string object
+                    Class className = BeanUtils.getClassByName(targetType);
+                    Object newValue = DataPropertyEditorRegistrar.convert(className, (String)rawValue);
                     valueHolder.setValue(newValue);
                     valueHolder.setConverted(true);
                 }
@@ -118,12 +124,13 @@ public class BeanUtils {
             Object rawValue = propertyValue.getValue();
             if (rawValue!=null) {
                 if(rawValue instanceof TypeConverter){  //deal with the object inherit the TypeConverter
-                    Object newValue = ((TypeConverter)rawValue).convert();
+                    Object newValue = ((TypeConverter)rawValue).convert(kernel);
                     propertyValue.setValue(newValue);
                     propertyValue.setConverted(true);
                 }
-                else if(PrimitiveTypeConversion.isPrimitive(targetType)) {  // deal with the primitive type
-                    Object newValue = PrimitiveTypeConversion.convert((String) rawValue, targetType);
+                else if(rawValue instanceof String){  // deal with the string object
+                    Class className = BeanUtils.getClassByName(targetType);
+                    Object newValue = DataPropertyEditorRegistrar.convert(className, (String)rawValue);
                     propertyValue.setValue(newValue);
                     propertyValue.setConverted(true);
                 }
@@ -147,5 +154,24 @@ public class BeanUtils {
             fieldsType.put(name, type);
         }
         return fieldsType;
+    }
+
+    public static Class getClassByName(String className) {
+        if (PrimitiveTypeConversion.isPrimitive(className)) {
+            return PrimitiveTypeConversion.getPrimitiveClass(className);
+        }
+        Class clazz = null;
+        try {
+            clazz = Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return clazz;
+    }
+    public static Boolean isBlank(String str){
+        if(str==null || str.trim().equals("")){
+            return true;
+        }
+        return false;
     }
 }

@@ -1,5 +1,6 @@
 package com.milky.bean.factory.xml;
 
+import com.milky.core.BeanDefinition;
 import com.milky.core.MicroKernel;
 import com.milky.core.Resource;
 import com.sun.glass.ui.ClipboardAssistance;
@@ -41,7 +42,18 @@ public class ReaderContext {
         this.microKernel = microKernel;
     }
 
+    public void registerBeanDefinition(BeanDefinition bd){
+        try {
+            this.microKernel.registerBeanDefinition(bd.getName(), bd);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     public Class getCachedClass(String className){
         return this.microKernel.getCachedClass(className);
+    }
+
+    public boolean containsBeanName(String id) {
+        return this.microKernel.containsBeanDefinition(id);
     }
 }

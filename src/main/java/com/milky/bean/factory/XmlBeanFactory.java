@@ -11,7 +11,7 @@ import java.io.Reader;
  * Created by 52678 on 2018/3/5.
  */
 public class XmlBeanFactory extends MicroKernel{
-    private XmlBeanDefinitionReader reader;
+    private XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader();
 
     public XmlBeanFactory(){
 
