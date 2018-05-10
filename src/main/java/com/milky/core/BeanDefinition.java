@@ -83,4 +83,11 @@ public class BeanDefinition {
         this.propertyValues.addPropertyValue(propertyValue);
     }
 
+    public void addCustomizedFeature(String name, Object object){
+        this.customizedFeatureMap.put(name, object);
+    }
+
+    public Object getCustomizedFeature(String name){
+        return this.customizedFeatureMap.get(name);
+    }
 }

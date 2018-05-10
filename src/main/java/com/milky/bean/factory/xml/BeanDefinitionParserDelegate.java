@@ -1,6 +1,7 @@
 package com.milky.bean.factory.xml;
 
 import com.milky.bean.factory.util.BeanUtils;
+import com.milky.bean.factory.xml.tag.XmlTagParser;
 import com.milky.core.BeanDefinition;
 import com.milky.core.ConstructorArgumentValues;
 import com.milky.core.PropertyValue;
@@ -9,10 +10,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import java.lang.reflect.Array;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by lenovo on 2018/4/28.
@@ -34,10 +32,10 @@ public class BeanDefinitionParserDelegate {
     private static final String REF_ELEMENT = "ref";
     private static final String REF_ATTRIBUTE = "ref";
 
-    private static final String ARRAY_ATTRIBUTE = "array";
-    private static final String LIST_ATTRIBUTE = "list";
-    private static final String SET_ATTRIBUTE = "set";
-    private static final String MAP_ATTRIBUTE = "map";
+    private static final String ARRAY_ELEMENT = "array";
+    private static final String LIST_ELEMENT = "list";
+    private static final String SET_ELEMENT = "set";
+    private static final String MAP_ELEMENT = "map";
 
     private static final String VALUE_TYPE_ATTRIBUTE = "value-type";
 
@@ -54,32 +52,24 @@ public class BeanDefinitionParserDelegate {
 
     private Set<String> defaultTagNameSet = new HashSet<String>();
 
+    /** map of the parsers for custom tag **/
+    private Map<String, XmlTagParser> customTagParser = new HashMap<String, XmlTagParser>();
+
     private ReaderContext readerContext;
 
     public BeanDefinitionParserDelegate(ReaderContext readerContext){
         this.readerContext = readerContext;
 
-        defaultTagNameSet.add(ID_ATTRIBUTE);
-        defaultTagNameSet.add(CLASS_ATTRIBUTE);
-        defaultTagNameSet.add(CONSTRUCTOR_ARG_ATTRIBUTE);
-        defaultTagNameSet.add(INDEX_ATTRIBUTE);
-        defaultTagNameSet.add(VALUE_ATTRIBUTE);
-        defaultTagNameSet.add(TYPE_ATTRIBUTE);
-        defaultTagNameSet.add(REF_ATTRIBUTE);
-        defaultTagNameSet.add(ARRAY_ATTRIBUTE);
-        defaultTagNameSet.add(LIST_ATTRIBUTE);
-        defaultTagNameSet.add(SET_ATTRIBUTE);
-        defaultTagNameSet.add(MAP_ATTRIBUTE);
-        defaultTagNameSet.add(VALUE_TYPE_ATTRIBUTE);
-        defaultTagNameSet.add(KEY_TYPE_ATTRIBUTE);
-        defaultTagNameSet.add(KEY_ATTRIBUTE);
-        defaultTagNameSet.add(NAME_ATTRIBUTE);
-        defaultTagNameSet.add(BEAN_ATTRIBUTE);
+        defaultTagNameSet.add(VALUE_ELEMENT);
+        defaultTagNameSet.add(REF_ELEMENT);
+        defaultTagNameSet.add(ARRAY_ELEMENT);
+        defaultTagNameSet.add(LIST_ELEMENT);
+        defaultTagNameSet.add(SET_ELEMENT);
+        defaultTagNameSet.add(MAP_ELEMENT);
+        defaultTagNameSet.add(ENTRY_ELEMENT);
+
     }
 
-    public boolean isDefaultNamespace(Element ele) {
-        return ele.isDefaultNamespace(BEANS_NAMESPACE_URI);
-    }
 
     public void parseBeanDefinitionElement(Element ele) throws Exception {
         String id = ele.getAttribute(ID_ATTRIBUTE);
@@ -171,17 +161,28 @@ public class BeanDefinitionParserDelegate {
 
     }
 
-    public void parseCustomElements(Element ele) {
-
-    }
-
     public void parseCustomElements(Element ele, BeanDefinition bd) {
-
-    }
-
-
-    public Object parseCustomElement(Element ele, BeanDefinition bd){
-        return null;
+        BeanDefinition bd2 = bd;
+        NodeList nl = ele.getChildNodes();
+        for(int i=0; i<nl.getLength(); i++){
+            Node node = nl.item(i);
+            if(node instanceof  Element){
+                if(bd2==null){
+                    bd2 = new BeanDefinition();
+                }
+                Element element = (Element) node;
+                if(isDefaultElement(element)){
+                    continue;
+                }
+                else{
+                    String tagName = getTagName(element);
+                    XmlTagParser parser = this.customTagParser.get(tagName);
+                    if(parser!=null){
+                        parser.parse(element, bd);
+                    }
+                }
+            }
+        }
     }
 
 
@@ -270,16 +271,16 @@ public class BeanDefinitionParserDelegate {
     private Object parsePropertySubElement(Element ele, BeanDefinition bd) throws Exception {
 
         String nodeName = ele.getTagName().toLowerCase();
-        if(nodeName.equals(LIST_ATTRIBUTE)){
+        if(nodeName.equals(LIST_ELEMENT)){
             return parseListElement(ele, bd);
         }
-        else if(nodeName.equals(ARRAY_ATTRIBUTE)){
+        else if(nodeName.equals(ARRAY_ELEMENT)){
             return parseArrayElement(ele, bd);
         }
-        else if(nodeName.equals(MAP_ATTRIBUTE)){
+        else if(nodeName.equals(MAP_ELEMENT)){
             return parseMapElement(ele, bd);
         }
-        else if(nodeName.equals(SET_ATTRIBUTE)){
+        else if(nodeName.equals(SET_ELEMENT)){
             return parseSetElement(ele, bd);
         }
         else{
@@ -397,5 +398,12 @@ public class BeanDefinitionParserDelegate {
 
     public String getTagName(Element element){
         return element.getTagName().toLowerCase();
+    }
+
+    public void registerCustomTagParser(String tagName, XmlTagParser parser) throws Exception {
+        if(this.defaultTagNameSet.contains(tagName)){
+            throw new Exception("cannot register a default tag name");
+        }
+        this.customTagParser.put(tagName, parser);
     }
 }

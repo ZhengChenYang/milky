@@ -52,6 +52,8 @@ public class MicroKernel implements BeanDefinitionRegistry {
 
     private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<String, ObjectFactory<?>>(16);
 
+    private final List<BeanDefinitionPostProcessor> beanDefinitionPostProcessorList =
+            new LinkedList<BeanDefinitionPostProcessor>();
     @Override
     public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) throws Exception {
 
@@ -319,4 +321,10 @@ public class MicroKernel implements BeanDefinitionRegistry {
     public Map<String, Object> getSingletonObjects(){
         return Collections.unmodifiableMap(this.singletonObjects);
     }
+
+    public void registerBeanDefinitionPostProcessor(BeanDefinitionPostProcessor processor){
+        this.beanDefinitionPostProcessorList.add(processor);
+    }
+
+
 }

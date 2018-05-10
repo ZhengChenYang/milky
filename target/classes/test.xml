@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <beans>
-    <bean id="testBean" class="com.milky.Test">
+    <bean id="testBean" class="com.milky.Test" scope="singleton">
         <constructor-arg index="1" type="char" name="a" value="abc" />
         <constructor-arg index="2" type="int" name="b" value="2" />
         <constructor-arg index="3" type="int" name="c" value="3" />
