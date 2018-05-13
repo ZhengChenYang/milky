@@ -5,6 +5,7 @@ import com.milky.core.*;
 
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Map;
 
@@ -76,14 +77,18 @@ public class Main {
     }
 
     private static void test2() throws Exception {
-        File file = new File("C:\\Users\\52678\\Desktop\\file\\project\\milky\\src\\main\\resources\\test.xml");
-        FileSystemResource fsr = new FileSystemResource(file);
-        XmlBeanFactory factory = new XmlBeanFactory();
-        factory.loadResource(fsr);
-
-        System.out.println(factory.getBean("testBean"));
-        Map<String, Object> map = factory.getSingletonObjects();
-        System.out.println(map);
+//        File file = new File("C:\\Users\\52678\\Desktop\\file\\project\\milky\\src\\main\\resources\\test.xml");
+//        FileSystemResource fsr = new FileSystemResource(file);
+//        XmlBeanFactory factory = new XmlBeanFactory();
+//        factory.loadResource(fsr);
+//
+//        System.out.println(factory.getBean("testBean"));
+//        Map<String, Object> map = factory.getSingletonObjects();
+//        System.out.println(map);
+        Method[] methods = String.class.getMethods();
+        for(int i=0; i<methods.length; i++){
+            System.out.println(methods[i].getName());
+        }
     }
 
 }

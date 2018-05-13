@@ -9,6 +9,7 @@ public class AopAspect {
     private String beforeMethod;
     private String afterMethod;
     private String afterThrowingMethod;
+    private Object aspectRefObejct;
 
     public String getAspectRef() {
         return aspectRef;
@@ -48,5 +49,13 @@ public class AopAspect {
 
     public void setAfterThrowingMethod(String afterThrowingMethod) {
         this.afterThrowingMethod = afterThrowingMethod;
+    }
+
+    public Object getAspectRefObejct() {
+        return aspectRefObejct;
+    }
+
+    public void setAspectRefObejct(Object aspectRefObejct) {
+        this.aspectRefObejct = aspectRefObejct;
     }
 }

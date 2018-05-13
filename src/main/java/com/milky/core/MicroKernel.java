@@ -69,8 +69,16 @@ public class MicroKernel implements BeanDefinitionRegistry {
         }
         else{
             executeComponentsInRegistry(beanName, beanDefinition);
-            this.beanDefinitionMap.put(beanName, beanDefinition);
-            this.beanDefinitionNames.add(beanName);
+            if(beanDefinition.getBeanClass().isAssignableFrom(MicroKernelPostProcessor.class)){
+                Class clazz = beanDefinition.getBeanClass();
+                MicroKernelPostProcessor processor = (MicroKernelPostProcessor) clazz.newInstance();
+                processor.postProcess(beanDefinition, this);
+            }
+            else{
+                this.beanDefinitionMap.put(beanName, beanDefinition);
+                this.beanDefinitionNames.add(beanName);
+            }
+
         }
     }
 
@@ -244,12 +252,12 @@ public class MicroKernel implements BeanDefinitionRegistry {
 
     private void instantiateBean(Constructor constructor, BeanDefinition bd, BeanWrapper beanWrapper) throws IllegalAccessException, InvocationTargetException, InstantiationException {
         Map<Integer, ConstructorArgumentValues.ValueHolder> map = bd.getConstructorArgumentValues().getIndexedArgumentValues();
+        Class[] argsTypes = constructor.getParameterTypes();
         if(map.size()==0){
             constructor.newInstance();
         }
         else{
             // assemble the parameters
-            Class[] argsTypes = constructor.getParameterTypes();
             Object[] params = new Object[map.size()];
             for(int i=0; i<map.size(); i++){
                 ConstructorArgumentValues.ValueHolder valueHolder = map.get(i);
@@ -266,6 +274,7 @@ public class MicroKernel implements BeanDefinitionRegistry {
                 }
             }
 
+            // argsTypes beanDefinition microKernel
             Object newInstance = constructor.newInstance(params);
             LOGGER.info(newInstance + "实例创建成功！");
 

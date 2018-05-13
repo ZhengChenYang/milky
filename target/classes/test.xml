@@ -7,7 +7,7 @@
         <constructor-arg index="4" name="str">
             <array value-type="char">
                 <value>aaa</value>
-                <value>bb</value>
+
             </array>
         </constructor-arg>
         <property name="s" value="true" />

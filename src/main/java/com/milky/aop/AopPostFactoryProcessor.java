@@ -12,16 +12,13 @@ import java.util.Map;
  */
 public class AopPostFactoryProcessor implements MicroKernelPostProcessor{
 
+    private static final String AOP_KEY = "aop";
     @Override
     public void postProcess(BeanDefinition bd, MicroKernel microKernel) {
         AopBeanDefinitionPostProcessor beanDefinitionPostProcessor = new AopBeanDefinitionPostProcessor();
         Map<String, Object> customizedFeatureMap = bd.getCustomizedFeatureMap();
-        for (Map.Entry<String, Object> entry: customizedFeatureMap.entrySet()){
-            Object value = entry.getValue();
-            if(value instanceof AopAspect){
-                beanDefinitionPostProcessor.addAopAspect((AopAspect)value);
-            }
-        }
+        Object value = customizedFeatureMap.get(AOP_KEY);
+        beanDefinitionPostProcessor.setAopAspect((AopAspect)value);
         microKernel.registerBeanDefinitionPostProcessor(beanDefinitionPostProcessor);
     }
 }
