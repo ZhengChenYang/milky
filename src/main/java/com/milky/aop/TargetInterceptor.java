@@ -12,17 +12,40 @@ import java.lang.reflect.Method;
  */
 public class TargetInterceptor implements MethodInterceptor {
 
-    private Method[] methods;
     private AopAspect aopAspect;
+    private Method beforeMethod;
+    private Method afterMethod;
+    private Method afterThrowingMethod;
+    private Object aopAspectObject;
 
-    public TargetInterceptor(Method[] methods, AopAspect aspect){
-        this.methods = methods;
+    public TargetInterceptor(AopAspect aspect){
         this.aopAspect = aspect;
+
+        //创建对象
+        this.aopAspectObject = this.aopAspect.getAspectRefObject();
+        try {
+            this.beforeMethod = this.aopAspectObject.getClass().getMethod(aopAspect.getBeforeMethod());
+            this.afterMethod = this.aopAspectObject.getClass().getMethod(aopAspect.getAfterMethod());
+            this.afterThrowingMethod = this.aopAspectObject.getClass().getMethod(aopAspect.getAfterThrowingMethod());
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
-    public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
-        return null;
+    public Object intercept(Object o, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {
+        Object result = null;
+        try{
+            beforeMethod.invoke(this.aopAspectObject);
+            result = methodProxy.invokeSuper(o, params);
+            afterMethod.invoke(this.aopAspectObject);
+        }
+        catch (Exception e){
+            afterThrowingMethod.invoke(this.aopAspectObject);
+            e.printStackTrace();
+        }
+
+        return result;
     }
 }
 

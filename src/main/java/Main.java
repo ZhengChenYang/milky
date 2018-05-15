@@ -1,11 +1,15 @@
 import com.milky.Test;
 
+import com.milky.aop.AopPostFactoryProcessor;
+import com.milky.aop.AopXmlTagParser;
 import com.milky.bean.factory.XmlBeanFactory;
 import com.milky.core.*;
 
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
@@ -14,8 +18,13 @@ import java.util.Map;
  */
 public class Main {
 
-    public static void main(String[] args) throws Exception {
-        test2();
+    public static void main(String[] args){
+        try{
+            test2();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
 
     }
 
@@ -77,18 +86,29 @@ public class Main {
     }
 
     private static void test2() throws Exception {
-//        File file = new File("C:\\Users\\52678\\Desktop\\file\\project\\milky\\src\\main\\resources\\test.xml");
-//        FileSystemResource fsr = new FileSystemResource(file);
-//        XmlBeanFactory factory = new XmlBeanFactory();
-//        factory.loadResource(fsr);
-//
-//        System.out.println(factory.getBean("testBean"));
-//        Map<String, Object> map = factory.getSingletonObjects();
-//        System.out.println(map);
-        Method[] methods = String.class.getMethods();
-        for(int i=0; i<methods.length; i++){
-            System.out.println(methods[i].getName());
+        File file = new File("C:\\Users\\52678\\Desktop\\file\\project\\milky\\src\\main\\resources\\test.xml");
+        FileSystemResource fsr = new FileSystemResource(file);
+        XmlBeanFactory factory = new XmlBeanFactory();
+
+        factory.registerCustomTagParser("aop-config", new AopXmlTagParser());
+
+
+        factory.loadResource(fsr);
+
+        Test test = (Test) factory.getBean("testBean");
+        test.aopTest0();
+        test.aopTest1();
+
+    }
+
+    private static void test3() throws ClassNotFoundException {
+        Class clazz = Test.class;
+        Field[] fields = clazz.getDeclaredFields();
+        for(Field field: fields){
+            System.out.println(field.getType().getName());
         }
+
+        System.out.println(Class.forName("class com.milky.Test"));
     }
 
 }

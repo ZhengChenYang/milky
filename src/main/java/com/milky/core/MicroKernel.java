@@ -56,8 +56,10 @@ public class MicroKernel implements BeanDefinitionRegistry {
             new LinkedList<BeanDefinitionPostProcessor>();
     @Override
     public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) throws Exception {
-
-        BeanDefinition oldBeanDefinition = beanDefinitionMap.get(beanName);
+        BeanDefinition oldBeanDefinition = null;
+        if(beanName!=null){
+            oldBeanDefinition = beanDefinitionMap.get(beanName);
+        }
 
         if(oldBeanDefinition!=null){
             if(!isAllowBeanDefinitionOverriding()){
@@ -68,8 +70,7 @@ public class MicroKernel implements BeanDefinitionRegistry {
             this.beanDefinitionMap.put(beanName, beanDefinition);
         }
         else{
-            executeComponentsInRegistry(beanName, beanDefinition);
-            if(beanDefinition.getBeanClass().isAssignableFrom(MicroKernelPostProcessor.class)){
+            if(MicroKernelPostProcessor.class.isAssignableFrom(beanDefinition.getBeanClass())){
                 Class clazz = beanDefinition.getBeanClass();
                 MicroKernelPostProcessor processor = (MicroKernelPostProcessor) clazz.newInstance();
                 processor.postProcess(beanDefinition, this);
@@ -112,15 +113,19 @@ public class MicroKernel implements BeanDefinitionRegistry {
     }
 
     public Object getBean(String beanName) throws Exception {
-        BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
+        BeanDefinition beanDefinition = null;
+        if(beanName!=null){
+            beanDefinition = beanDefinitionMap.get(beanName);
+        }
+
         if(beanDefinition==null){
             throw new Exception("there is no bean definition named ["+beanName+"]");
         }
         String scope = beanDefinition.getScope();
 
         Object singletonInstance = getSingleton(beanName);
-        if(singletonInstance==null && isSingletonCurrentlyInCreation(beanName)){
-            throw new Exception("there is a circular reference!");
+        if(singletonInstance!=null && isSingletonCurrentlyInCreation(beanName)){
+            throw new Exception("there is a circular reference for ["+beanName+"]!");
         }
 
         final BeanWrapper beanWrapper = new BeanWrapper(singletonInstance);
@@ -188,7 +193,7 @@ public class MicroKernel implements BeanDefinitionRegistry {
         return constructor;
     }
 
-    private void populateBean(BeanDefinition beanDefinition, BeanWrapper beanWrapper){
+    private void populateBean(BeanDefinition beanDefinition, BeanWrapper beanWrapper) throws Exception {
 
         PropertyValues propertyValues = beanDefinition.getPropertyValues();
         if(propertyValues.isEmpty()){
@@ -215,20 +220,14 @@ public class MicroKernel implements BeanDefinitionRegistry {
 
             // find the setter method
             Method method = null;
-            try {
-                method = getSetMethod(clazz, propertyValue.getName(), fieldType);
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
+
+            method = getSetMethod(clazz, propertyValue.getName(), fieldType);
+            if(method==null){
+                throw new Exception("cannot find the set method for field ["+propertyValue.getName()+"]");
             }
 
             // inject the value into the field
-            try {
-                method.invoke(beanWrapper.getWrappedObject(),fieldValue);
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            }
+            method.invoke(beanWrapper.getWrappedObject(),fieldValue);
 
         }
     }
@@ -239,7 +238,13 @@ public class MicroKernel implements BeanDefinitionRegistry {
         String methodName = "set" + firstChar + fieldName.substring(1);
 
         Class fieldClass = BeanUtils.getClassByName(fieldType);
-        return clazz.getMethod(methodName, fieldClass);
+        if(fieldClass!=null){
+            return clazz.getMethod(methodName, fieldClass);
+        }
+        else{
+            return clazz.getMethod(methodName);
+        }
+
     }
 
     public Object getSingleton(String beanName) {
@@ -250,11 +255,12 @@ public class MicroKernel implements BeanDefinitionRegistry {
         return singletonInstance;
     }
 
-    private void instantiateBean(Constructor constructor, BeanDefinition bd, BeanWrapper beanWrapper) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+    private void instantiateBean(Constructor constructor, BeanDefinition bd, BeanWrapper beanWrapper) throws Exception {
+        Object newInstance = null;
         Map<Integer, ConstructorArgumentValues.ValueHolder> map = bd.getConstructorArgumentValues().getIndexedArgumentValues();
         Class[] argsTypes = constructor.getParameterTypes();
         if(map.size()==0){
-            constructor.newInstance();
+            newInstance = constructor.newInstance();
         }
         else{
             // assemble the parameters
@@ -274,12 +280,27 @@ public class MicroKernel implements BeanDefinitionRegistry {
                 }
             }
 
-            // argsTypes beanDefinition microKernel
-            Object newInstance = constructor.newInstance(params);
-            LOGGER.info(newInstance + "实例创建成功！");
-
-            beanWrapper.setWrappedObject(newInstance);
+            newInstance = applyBeanDefinitionPostProcessors(bd, params, constructor);
+            if(newInstance==null){
+                newInstance = constructor.newInstance(params);
+            }
         }
+
+        LOGGER.info(newInstance + "实例创建成功！");
+
+        beanWrapper.setWrappedObject(newInstance);
+    }
+
+    public Object applyBeanDefinitionPostProcessors(BeanDefinition beanDefinition, Object[] params, Constructor constructor) throws Exception {
+        List<BeanDefinitionPostProcessor> processorList = this.beanDefinitionPostProcessorList;
+        for(BeanDefinitionPostProcessor beanDefinitionPostProcessor: processorList){
+            Object result = beanDefinitionPostProcessor.postProcess(constructor, params, beanDefinition, this);
+            if(result != null){
+                return result;
+            }
+        }
+
+        return null;
     }
 
     public Map<String, Class> getCachedClasses() {

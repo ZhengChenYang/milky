@@ -15,6 +15,7 @@ public class AopXmlTagParser implements XmlTagParser {
     public void parse(Element ele, BeanDefinition bd) {
         try {
             parseAopAspectElements(ele, bd);
+            bd.setBeanClass(AopPostFactoryProcessor.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -38,13 +39,15 @@ public class AopXmlTagParser implements XmlTagParser {
                     String afterMethod = parseAfterMethod(element);
                     String afterThrowingMethod = parseThrowingMethod(element);
 
+                    aopAspect.setAspectRef(refAttr);
                     aopAspect.setExpression(pointcut);
                     aopAspect.setBeforeMethod(beforeMethod);
                     aopAspect.setAfterMethod(afterMethod);
                     aopAspect.setAfterThrowingMethod(afterThrowingMethod);
 
-                    String featureName = "aop" + (numOfAspect++);
+                    String featureName = "aop";
                     bd.addCustomizedFeature(featureName, aopAspect);
+                    break;
                 }
             }
         }

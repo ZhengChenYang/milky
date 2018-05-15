@@ -10,6 +10,7 @@ import org.w3c.dom.NodeList;
  */
 public class XmlBeanDefinitionDocumentReader implements BeanDefinitionDocumentReader{
 
+    private BeanDefinitionParserDelegate delegate = new BeanDefinitionParserDelegate();
     /**
      * parser XML document
      * @param doc
@@ -17,13 +18,13 @@ public class XmlBeanDefinitionDocumentReader implements BeanDefinitionDocumentRe
     @Override
     public void registerBeanDefinitions(Document doc, ReaderContext context) {
 
-        Node root = (Element) doc.getDocumentElement();
-        BeanDefinitionParserDelegate delegate = new BeanDefinitionParserDelegate(context);
+        Node root =  doc.getDocumentElement();
+        delegate.setReaderContext(context);
         parseAndRegisterBeanDefinitions(root, delegate);
     }
 
-    private void parseAndRegisterBeanDefinitions(Node root, BeanDefinitionParserDelegate deletage){
-        parseBeanDefinitions((Element) root, deletage);
+    private void parseAndRegisterBeanDefinitions(Node root, BeanDefinitionParserDelegate delegate){
+        parseBeanDefinitions((Element) root, delegate);
     }
 
     public static void parseBeanDefinitions(Element root, BeanDefinitionParserDelegate delegate){
@@ -36,7 +37,7 @@ public class XmlBeanDefinitionDocumentReader implements BeanDefinitionDocumentRe
                     parseDefaultElement(ele, delegate);
                 }
                 else{
-                    delegate.parseCustomElements(ele, null);
+                    delegate.parseCustomElement(ele, null);
                 }
             }
         }
@@ -50,5 +51,13 @@ public class XmlBeanDefinitionDocumentReader implements BeanDefinitionDocumentRe
                 e.printStackTrace();
             }
         }
+    }
+
+    public BeanDefinitionParserDelegate getDelegate() {
+        return delegate;
+    }
+
+    public void setDelegate(BeanDefinitionParserDelegate delegate) {
+        this.delegate = delegate;
     }
 }

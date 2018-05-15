@@ -11,5 +11,24 @@
             </array>
         </constructor-arg>
         <property name="s" value="true" />
+        <property name="test" ref="test" />
     </bean>
+    <bean id="test" class="com.milky.Test" />
+
+    <bean id="transactionPointCut" class="com.milky.PointCut" />
+
+    <!--&lt;!&ndash; aop相关的配置和说明 &ndash;&gt;-->
+    <!--<aop-config>-->
+        <!--&lt;!&ndash; 定义相关的切面 &ndash;&gt;-->
+        <!--<aop-aspect ref="transactionPointCut">-->
+            <!--&lt;!&ndash; 定义切入点 &ndash;&gt;-->
+            <!--<aop-pointcut expression=" aopTest[0-9]" id="transactionPointCut"/>-->
+            <!--<aop-before pointcut-ref="transactionPointCut" method="beginTransaction"/>-->
+            <!--<aop-after pointcut-ref="transactionPointCut" method="commitTransaction"/>-->
+            <!--<aop-after-throwing pointcut-ref="transactionPointCut" method="rollBackTransaction"/>-->
+        <!--</aop-aspect>-->
+
+    <!--</aop-config>-->
+
+
 </beans>

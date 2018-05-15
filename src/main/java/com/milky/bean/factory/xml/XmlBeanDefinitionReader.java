@@ -13,11 +13,11 @@ import java.io.InputStream;
 /**
  * Created by 52678 on 2018/3/5.
  */
-public class XmlBeanDefinitionReader{
+public class XmlBeanDefinitionReader {
 
     private DocumentLoader documentLoader = new DocumentLoader();
 
-    private BeanDefinitionDocumentReader documentReader;
+    private XmlBeanDefinitionDocumentReader documentReader = new XmlBeanDefinitionDocumentReader();
 
     public void loadResource(Resource resource, ReaderContext readerContext) {
         InputStream inputStream = null;
@@ -28,8 +28,7 @@ public class XmlBeanDefinitionReader{
             loadBeanDefinitions(inputSource, readerContext);
         } catch (Exception e) {
             e.printStackTrace();
-        }
-        finally {
+        } finally {
             try {
                 inputStream.close();
             } catch (IOException e) {
@@ -38,7 +37,7 @@ public class XmlBeanDefinitionReader{
         }
     }
 
-    private void loadBeanDefinitions(InputSource inputSource, ReaderContext readerContext){
+    private void loadBeanDefinitions(InputSource inputSource, ReaderContext readerContext) {
         Document doc = null;
         try {
             doc = doLoadDocument(inputSource);
@@ -54,10 +53,15 @@ public class XmlBeanDefinitionReader{
         return this.documentLoader.loadDocument(inputSource);
     }
 
-    private void registerBeanDefinitions(Document doc, ReaderContext readerContext){
-        XmlBeanDefinitionDocumentReader documentReader = new XmlBeanDefinitionDocumentReader();
+    private void registerBeanDefinitions(Document doc, ReaderContext readerContext) {
         documentReader.registerBeanDefinitions(doc, readerContext);
     }
 
+    public XmlBeanDefinitionDocumentReader getDocumentReader() {
+        return documentReader;
+    }
 
+    public void setDocumentReader(XmlBeanDefinitionDocumentReader documentReader) {
+        this.documentReader = documentReader;
+    }
 }

@@ -150,7 +150,7 @@ public class BeanUtils {
         Map<String,String> fieldsType = new HashMap<String, String>();
         for(int i = 0; i < fields.length; i++){
             String name = fields[i].getName();
-            String type = fields[i].getType().toString().trim();
+            String type = fields[i].getType().getName().trim();
             fieldsType.put(name, type);
         }
         return fieldsType;
@@ -168,6 +168,7 @@ public class BeanUtils {
         }
         return clazz;
     }
+
     public static Boolean isBlank(String str){
         if(str==null || str.trim().equals("")){
             return true;

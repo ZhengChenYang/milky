@@ -17,6 +17,9 @@ public class Test {
     public int c;
     private boolean s;
     public char[] str;
+    private Test test;
+
+    public Test(){}
 
     public Test(char a, int b, int c, char[] str){
         this.a = a;
@@ -48,5 +51,21 @@ public class Test {
         for(Field f:field){
             System.out.println(f.getName());
         }
+    }
+
+    public void aopTest0(){
+        System.out.println("this is aop test");
+    }
+
+    public void aopTest1(){
+        System.out.println("this is aop test2");
+    }
+
+    public Test getTest() {
+        return test;
+    }
+
+    public void setTest(Test test) {
+        this.test = test;
     }
 }

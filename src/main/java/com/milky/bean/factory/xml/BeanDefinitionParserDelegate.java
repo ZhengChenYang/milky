@@ -18,16 +18,18 @@ import java.util.*;
 public class BeanDefinitionParserDelegate {
     public static final String BEANS_NAMESPACE_URI = "http://www.milky.org/schema/beans";
 
+    private static final String BEAN_ELEMENT = "bean";
     private static final String ID_ATTRIBUTE = "id";
     private static final String CLASS_ATTRIBUTE = "class";
     private static final String SCOPE_ATTRIBUTE = "scope";
-    private static final String CONSTRUCTOR_ARG_ATTRIBUTE = "constructor-arg";
+    private static final String CONSTRUCTOR_ARG_ELEMENT = "constructor-arg";
     private static final String INDEX_ATTRIBUTE = "index";
 
     private static final String VALUE_ELEMENT = "value";
     private static final String VALUE_ATTRIBUTE = "value";
 
     private static final String TYPE_ATTRIBUTE = "type";
+    private static final String PROPERTY_ELEMENT = "property";
 
     private static final String REF_ELEMENT = "ref";
     private static final String REF_ATTRIBUTE = "ref";
@@ -57,9 +59,9 @@ public class BeanDefinitionParserDelegate {
 
     private ReaderContext readerContext;
 
-    public BeanDefinitionParserDelegate(ReaderContext readerContext){
-        this.readerContext = readerContext;
+    public BeanDefinitionParserDelegate(){
 
+        defaultTagNameSet.add(BEAN_ELEMENT);
         defaultTagNameSet.add(VALUE_ELEMENT);
         defaultTagNameSet.add(REF_ELEMENT);
         defaultTagNameSet.add(ARRAY_ELEMENT);
@@ -67,9 +69,18 @@ public class BeanDefinitionParserDelegate {
         defaultTagNameSet.add(SET_ELEMENT);
         defaultTagNameSet.add(MAP_ELEMENT);
         defaultTagNameSet.add(ENTRY_ELEMENT);
+        defaultTagNameSet.add(CONSTRUCTOR_ARG_ELEMENT);
+        defaultTagNameSet.add(PROPERTY_ELEMENT);
 
     }
 
+    public ReaderContext getReaderContext() {
+        return readerContext;
+    }
+
+    public void setReaderContext(ReaderContext readerContext) {
+        this.readerContext = readerContext;
+    }
 
     public void parseBeanDefinitionElement(Element ele) throws Exception {
         String id = ele.getAttribute(ID_ATTRIBUTE);
@@ -82,7 +93,7 @@ public class BeanDefinitionParserDelegate {
 
         String className = ele.getAttribute(CLASS_ATTRIBUTE);
         if(BeanUtils.isBlank(className)){
-            throw new Exception("class attribute cannot be null!");
+            throw new Exception("class attribute cannot be blank!");
         }
         Class clazz = this.readerContext.getCachedClass(className);
 
@@ -97,7 +108,6 @@ public class BeanDefinitionParserDelegate {
         if(!BeanUtils.isBlank(scope)){
             bd.setScope(scope);
         }
-
 
         // 解析构造函数参数
         parseConstructorArgElements(ele, bd);
@@ -118,7 +128,7 @@ public class BeanDefinitionParserDelegate {
             Node node = nl.item(i);
             if(node instanceof Element){
                 Element element = (Element) node;
-                if (getTagName(element).equals("property")) {
+                if (getTagName(element).equals(PROPERTY_ELEMENT)) {
                     parsePropertyElement((Element) node, bd);
                 }
             }
@@ -185,6 +195,19 @@ public class BeanDefinitionParserDelegate {
         }
     }
 
+    public void parseCustomElement(Element ele, BeanDefinition bd){
+        BeanDefinition bd2 = bd;
+        if(bd2==null){
+            bd2 = new BeanDefinition();
+        }
+        String tagName = getTagName(ele);
+        XmlTagParser parser = this.customTagParser.get(tagName);
+        if(parser!=null){
+            parser.parse(ele, bd2);
+        }
+        readerContext.registerBeanDefinition(bd2);
+    }
+
 
     public void parseConstructorArgElements(Element ele, BeanDefinition bd) throws Exception {
         NodeList nl = ele.getChildNodes();
@@ -192,7 +215,7 @@ public class BeanDefinitionParserDelegate {
             Node node = nl.item(i);
             if(node instanceof Element){
                 Element element = (Element) node;
-                if(getTagName(element).equals(CONSTRUCTOR_ARG_ATTRIBUTE)){
+                if(getTagName(element).equals(CONSTRUCTOR_ARG_ELEMENT)){
                     parseConstructorArgElement(element, bd);
                 }
             }
@@ -405,5 +428,9 @@ public class BeanDefinitionParserDelegate {
             throw new Exception("cannot register a default tag name");
         }
         this.customTagParser.put(tagName, parser);
+    }
+
+    public void printXmlTagParser(){
+        System.out.println(this.customTagParser);
     }
 }
