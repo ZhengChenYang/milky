@@ -100,8 +100,7 @@ public class BeanUtils {
                 }
                 else{
                     throw new Exception("error primitive type name!");
-                } 
-
+                }
             }
 
             //deal with the reference type
@@ -116,7 +115,8 @@ public class BeanUtils {
         return valueHolder.getValue();
     }
 
-    public static Object executeConversion(PropertyValue propertyValue, MicroKernel kernel, String targetType) throws Exception {
+    public static Object
+    executeConversion(PropertyValue propertyValue, MicroKernel kernel, String targetType) throws Exception {
 
         String ref = propertyValue.getRef();
 

@@ -1,4 +1,3 @@
-import com.milky.Test;
 
 import com.milky.aop.AopPostFactoryProcessor;
 import com.milky.aop.AopXmlTagParser;
@@ -95,9 +94,11 @@ public class Main {
 
         factory.loadResource(fsr);
 
-        Test test = (Test) factory.getBean("testBean");
-        test.aopTest0();
-        test.aopTest1();
+
+        Test testA = (Test) factory.getBean("testBean");
+        testA.aopTest0();
+        testA.aopTest1();
+        System.out.println(testA.toString());
 
     }
 

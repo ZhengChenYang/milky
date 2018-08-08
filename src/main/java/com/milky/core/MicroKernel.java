@@ -4,6 +4,7 @@ import com.milky.bean.factory.support.BeanDefinitionRegistry;
 import com.milky.bean.factory.util.BeanUtils;
 import com.milky.bean.factory.util.PrimitiveTypeConversion;
 import com.milky.bean.factory.util.editor.NumberEditor;
+import com.milky.core.exception.BeanCurrentlyInCreationException;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -37,9 +38,6 @@ public class MicroKernel implements BeanDefinitionRegistry {
     /** Config object for kernel */
     private MicroKernelConfig config;
 
-    /** List of Loaded components */
-    private List<Component> componentList = new ArrayList<Component>(64);
-
     /** cache of singleton objects: bean name --> bean instance */
     private final Map<String, Object> singletonObjects = new ConcurrentHashMap<String, Object>();
 
@@ -66,7 +64,6 @@ public class MicroKernel implements BeanDefinitionRegistry {
                 throw new Exception("Cannot register bean definition, there is already " +
                         "["+oldBeanDefinition+"] bound");
             }
-            executeComponentsInRegistry(beanName, beanDefinition);
             this.beanDefinitionMap.put(beanName, beanDefinition);
         }
         else{
@@ -84,13 +81,6 @@ public class MicroKernel implements BeanDefinitionRegistry {
     }
 
 
-    private void executeComponentsInRegistry(String beanName, BeanDefinition beanDefinition){
-        for(Component component: componentList){
-            component.doInRegistry(beanName, beanDefinition);
-
-
-        }
-    }
 
     @Override
     public void removeBeanDefinition(String beanName) {
@@ -124,8 +114,8 @@ public class MicroKernel implements BeanDefinitionRegistry {
         String scope = beanDefinition.getScope();
 
         Object singletonInstance = getSingleton(beanName);
-        if(singletonInstance!=null && isSingletonCurrentlyInCreation(beanName)){
-            throw new Exception("there is a circular reference for ["+beanName+"]!");
+        if(singletonInstance==null && isSingletonCurrentlyInCreation(beanName)){
+            throw new BeanCurrentlyInCreationException(beanName);
         }
 
         final BeanWrapper beanWrapper = new BeanWrapper(singletonInstance);
@@ -160,8 +150,6 @@ public class MicroKernel implements BeanDefinitionRegistry {
 
             // cache the object
             addInSingletonObjects(beanName, beanWrapper.getWrappedObject());
-
-            System.out.println(beanWrapper.getWrappedObject());
 
         }
         else if(scope.equals(PROTOTYPE_SCOPE)){
@@ -217,7 +205,9 @@ public class MicroKernel implements BeanDefinitionRegistry {
                 }
             }
             Object fieldValue = propertyValue.getValue();
-
+            if(fieldValue instanceof ObjectFactory){
+                fieldValue = ((ObjectFactory) fieldValue).getObject();
+            }
             // find the setter method
             Method method = null;
 
@@ -281,6 +271,7 @@ public class MicroKernel implements BeanDefinitionRegistry {
             }
 
             newInstance = applyBeanDefinitionPostProcessors(bd, params, constructor);
+
             if(newInstance==null){
                 newInstance = constructor.newInstance(params);
             }

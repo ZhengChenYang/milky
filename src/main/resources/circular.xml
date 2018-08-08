@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans>
+    <bean id="testA" class="Test" scope="singleton">
+        <constructor-arg type="com.milky.Test" ref="testB" />
+    </bean>
+    <bean id="testB" class="Test" scope="singleton">
+        <constructor-arg type="com.milky.Test" ref="testC" />
+    </bean>
+    <bean id="testC" class="Test" scope="singleton">
+        <constructor-arg type="com.milky.Test" ref="testA" />
+    </bean>
+
+    <!--<bean id="testA" class="Test" scope="singleton">-->
+        <!--<property name="test" ref="testB" />-->
+    <!--</bean>-->
+    <!--<bean id="testB" class="Test" scope="singleton">-->
+        <!--<property name="test" ref="testC" />-->
+    <!--</bean>-->
+    <!--<bean id="testC" class="Test" scope="singleton">-->
+        <!--<property name="test" ref="testA" />-->
+    <!--</bean>-->
+</beans>

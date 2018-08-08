@@ -1,10 +1,11 @@
-package com.milky;
+
 
 import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.ClassPathResource;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 
 
 /**
@@ -20,6 +21,16 @@ public class Test {
     private Test test;
 
     public Test(){}
+
+    public Test(Test test){
+        this.test = test;
+    }
+
+    public Test(char a, int b, int c){
+        this.a = a;
+        this.b = b;
+        this.c = c;
+    }
 
     public Test(char a, int b, int c, char[] str){
         this.a = a;
@@ -43,6 +54,7 @@ public class Test {
                 ", b=" + b +
                 ", c=" + c +
                 ", s=" + s +
+                ", str=" + Arrays.toString(str) +
                 '}';
     }
 
@@ -52,6 +64,7 @@ public class Test {
             System.out.println(f.getName());
         }
     }
+
 
     public void aopTest0(){
         System.out.println("this is aop test");
